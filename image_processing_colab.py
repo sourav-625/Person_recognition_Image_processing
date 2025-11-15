@@ -27,6 +27,9 @@ Run:
     python person_identification_filename_labels.py
 """
 
+from google.colab import output
+from google.colab.output import eval_js
+from base64 import b64decode
 import os
 import re
 import sys
@@ -256,38 +259,45 @@ def build_model(num_classes):
     model.summary()
     return model
 
-def capture_image_from_camera(save_path="captured.jpg"):
+def capture_from_camera():
+    js = """
+    async function takePhoto() {
+      const div = document.createElement('div');
+      const capture = document.createElement('button');
+      capture.textContent = 'Capture';
+      div.appendChild(capture);
+
+      const video = document.createElement('video');
+      video.width = 320;
+      video.height = 240;
+      div.appendChild(video);
+
+      document.body.appendChild(div);
+
+      const stream = await navigator.mediaDevices.getUserMedia({video: true});
+      video.srcObject = stream;
+      await video.play();
+
+      await new Promise((resolve) => capture.onclick = resolve);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 320;
+      canvas.height = 240;
+      canvas.getContext('2d').drawImage(video, 0, 0, 320, 240);
+
+      stream.getTracks().forEach(t => t.stop());
+      div.remove();
+
+      return canvas.toDataURL('image/jpeg', 0.9);
+    }
+    takePhoto();
     """
-    Opens the camera, shows live feed, and captures an image when SPACE is pressed.
-    ESC closes without capturing.
-    """
-    cap = cv2.VideoCapture(0)
-    if not cap.isOpened():
-        raise RuntimeError("Could not access the camera.")
 
-    print("\n[Camera] Press SPACE to capture image. Press ESC to exit.\n")
-
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            continue
-
-        cv2.imshow("Camera - Press SPACE to capture", frame)
-        key = cv2.waitKey(1)
-
-        if key == 27:  # ESC → exit
-            print("[Camera] Cancelled.")
-            cap.release()
-            cv2.destroyAllWindows()
-            return None
-
-        if key == 32:  # SPACE → capture
-            cv2.imwrite(save_path, frame)
-            print(f"[Camera] Image captured → saved to {save_path}")
-            cap.release()
-            cv2.destroyAllWindows()
-            return save_path
-
+    data = eval_js(js)
+    img_bytes = b64decode(data.split(',')[1])
+    img_array = np.frombuffer(img_bytes, dtype=np.uint8)
+    img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+    return img
 
 # -------------------------
 # Prediction: simulate multi-person detection (as required)
@@ -349,16 +359,16 @@ def main():
     print(f"\n[main] Training on full dataset (N={len(file_paths)} images, classes={num_classes}) for {EPOCHS} epochs.")
     model.fit(dataset, epochs=EPOCHS, verbose=VERBOSE)
 
-    # ---------- NEW CAMERA TESTING ----------
+    # ---------- NEW CAMERA TESTING (COLAB) ----------
     print("\n[main] Opening camera to capture test image...")
-    cam_path = capture_image_from_camera("camera_test.jpg")
 
-    if cam_path:
-        print("[main] Running model on captured image...")
-        identified = predict_people_in_image(model, class_names, cam_path, simulate_count=1)
-        print("[main] Identified:", identified)
-    else:
-        print("[main] Camera capture cancelled.")
+    img = capture_from_camera()  # JS-based webcam
+    cv2.imwrite("camera_test.jpg", img)
+    cam_path = "camera_test.jpg"
+
+    print("[main] Running model on captured image...")
+    identified = predict_people_in_image(model, class_names, cam_path, simulate_count=1)
+    print("[main] Identified:", identified)
 
     print("\n[main] Demo complete.\n")
     
