@@ -31,9 +31,9 @@ project/
 │   ├── firstName_lastName_02.png
 │   ├── anotherPerson_01.jpg
 │   └── ...
-├── train_model.ipynb
-├── predict_local.py
-└── predict_colab.ipynb
+├── image_processing.py
+├── image_processing_notebook.py
+└── image_processing_notebook.ipynb
 ```
 
 ---
@@ -51,7 +51,7 @@ firstName_lastName_<number>.jpg
 ```
 sourav_pati_01.jpg
 niranjan_pati_02.png
-anik_banerjee_03.jpg
+malati_pati_03.jpg
 ```
 
 The prefix (e.g., `sourav_pati`) becomes the **class label**.
@@ -98,7 +98,7 @@ label_map.json
 Run:
 
 ```bash
-python predict_local.py
+python image_processing.py
 ```
 
 ---
