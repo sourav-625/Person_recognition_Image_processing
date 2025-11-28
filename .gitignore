@@ -1,0 +1,68 @@
+# ----------------------------------------
+# Python
+# ----------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.joblib
+
+# Virtual environment
+facenet_env/
+env/
+venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VSCode settings
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+
+# ----------------------------------------
+# Models
+# ----------------------------------------
+# Large ONNX files should NOT go to GitHub
+models/*.onnx
+
+# Avoid accidentally pushing model weights
+*.pth
+*.pt
+
+# ----------------------------------------
+# Dataset / Personal images
+# ----------------------------------------
+person_images/
+outputs/
+unrequired_files/
+
+# Avoid committing temporary captured photos
+*.jpg
+*.jpeg
+*.png
+
+# ----------------------------------------
+# Logs
+# ----------------------------------------
+logs/
+*.log
+
+# ----------------------------------------
+# OS / Editor Junk Files
+# ----------------------------------------
+.DS_Store
+Thumbs.db
+
+# PowerShell history
+*.pshistory
+
+# ----------------------------------------
+# Environment files (optional)
+# ----------------------------------------
+# If you use secrets or paths
+.env
+*.env
