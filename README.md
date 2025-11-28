@@ -139,9 +139,3 @@ Saved in `outputs/`:
 - **ArcFace-ResNet100** — Apache 2.0  
 - **ONNX Runtime** — MIT  
 - Everything used is **100% free** and requires **no subscription**.
-
----
-
-## 📎 Download This README
-
-A downloadable version has been generated below.
