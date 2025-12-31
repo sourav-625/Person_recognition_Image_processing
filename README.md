@@ -53,7 +53,7 @@ project/
 ├── outputs/
 │   └── (embeddings + classifier are saved here)
 │
-└── Testing2.py
+└── Main.py
 ```
 
 ---
@@ -97,7 +97,8 @@ You need **1 or more** images per person.
 ### 2️⃣ Run the Script
 
 ```bash
-python Testing2.py
+python Main.py --mode train
+python Main.py --mode webcam
 ```
 
 What happens:
@@ -138,9 +139,3 @@ Saved in `outputs/`:
 - **ArcFace-ResNet100** — Apache 2.0  
 - **ONNX Runtime** — MIT  
 - Everything used is **100% free** and requires **no subscription**.
-
----
-
-## 📎 Download This README
-
-A downloadable version has been generated below.
