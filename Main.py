@@ -79,6 +79,7 @@ def webcam():
 
     app = init_face_model()
     cap = cv2.VideoCapture(0)
+    displayed_names = set()
 
     while True:
         ret, frame = cap.read()
@@ -94,7 +95,12 @@ def webcam():
             name, score, status = classify(emb, database)
 
             color = (0,255,0) if status=="MATCH" else (0,255,255) if status=="UNCERTAIN" else (0,0,255)
-            label = f"{name} | {status} | {score:.2f}"
+            label = f"Welcome {name} | {status} | {score:.2f}" if name != "UNKNOWN" else f"{name} | {status} | {score:.2f}"
+
+            display_name = name.replace("_", " ")
+            if (display_name not in displayed_names and display_name != "UNKNOWN"):
+                print(f"\nWelcome {display_name}\n")
+                displayed_names.add(display_name)
 
             cv2.rectangle(frame, (box[0], box[1]), (box[2], box[3]), color, 2)
             cv2.putText(frame, label, (box[0], box[1]-10),
