@@ -5,6 +5,8 @@ from insightface.app import FaceAnalysis
 from sklearn.metrics.pairwise import cosine_similarity
 import argparse
 import pickle
+import queue
+import threading
 
 BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / "person_images"
@@ -69,6 +71,21 @@ def classify(embedding, database):
     else:
         return "UNKNOWN", best_score, "REJECT"
 
+speech_queue = queue.Queue()
+
+def speech_worker():
+    import pythoncom
+    import win32com.client
+
+    pythoncom.CoInitialize()
+    speaker = win32com.client.Dispatch("SAPI.SpVoice")
+
+    while True:
+        text = speech_queue.get()
+        if text is None:
+            break
+        speaker.Speak(text)
+
 def webcam():
     if not DB_PATH.exists():
         print("Run training first.")
@@ -80,7 +97,7 @@ def webcam():
     app = init_face_model()
     cap = cv2.VideoCapture(0)
     displayed_names = set()
-
+    
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -100,6 +117,7 @@ def webcam():
             display_name = name.replace("_", " ")
             if (display_name not in displayed_names and display_name != "UNKNOWN"):
                 print(f"\nWelcome {display_name}\n")
+                speech_queue.put(f"Welcome {display_name}")
                 displayed_names.add(display_name)
 
             cv2.rectangle(frame, (box[0], box[1]), (box[2], box[3]), color, 2)
@@ -121,4 +139,5 @@ if __name__ == "__main__":
     if args.mode == "train":
         train()
     else:
+        threading.Thread(target=speech_worker, daemon=True).start()
         webcam()

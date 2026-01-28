@@ -1,3 +1,10 @@
+"""
+This file is only meant for testing and experimenting purposes. It is infact of no use to the user
+and it's only include here to contain blocks of code that did not make it to the main file and it's previous versions.
+The user can safely ignore this file.
+"""
+
+
 import cv2
 import numpy as np
 from pathlib import Path
