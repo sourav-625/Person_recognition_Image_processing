@@ -7,6 +7,7 @@ import argparse
 import pickle
 import queue
 import threading
+import pygame
 
 BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / "person_images"
@@ -76,6 +77,8 @@ speech_queue = queue.Queue()
 def speech_worker():
     import pythoncom
     import win32com.client
+    import pygame
+    import time
 
     pythoncom.CoInitialize()
     speaker = win32com.client.Dispatch("SAPI.SpVoice")
@@ -84,7 +87,18 @@ def speech_worker():
         text = speech_queue.get()
         if text is None:
             break
+
+        # Smooth fade-down (volume ducking)
+        for v in range(50, 5, -5):
+            pygame.mixer.music.set_volume(v / 100)
+            time.sleep(0.03)
+
         speaker.Speak(text)
+
+        # Smooth fade-up (resume exactly where it left off)
+        for v in range(5, 50, 5):
+            pygame.mixer.music.set_volume(v / 100)
+            time.sleep(0.03)
 
 def webcam():
     if not DB_PATH.exists():
@@ -131,6 +145,12 @@ def webcam():
     cap.release()
     cv2.destroyAllWindows()
 
+def start_background_music():
+    pygame.mixer.init()
+    pygame.mixer.music.load("background.mp3")
+    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.play(-1)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=["train", "webcam"], required=True)
@@ -139,5 +159,6 @@ if __name__ == "__main__":
     if args.mode == "train":
         train()
     else:
+        threading.Thread(target=start_background_music, daemon=True).start()
         threading.Thread(target=speech_worker, daemon=True).start()
         webcam()
